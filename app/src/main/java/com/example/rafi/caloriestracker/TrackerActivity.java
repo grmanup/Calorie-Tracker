@@ -1,5 +1,6 @@
 package com.example.rafi.caloriestracker;
 
+import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Context;
@@ -29,6 +30,7 @@ public class TrackerActivity extends AppCompatActivity
     TextView activityType;
     TextView confidencePercentage;
     private Context mContext;
+
     private ActivityRecognitionClient mActivityRecognitionClient;
 
     @Override
@@ -86,32 +88,41 @@ public class TrackerActivity extends AppCompatActivity
     //Process the list of activities//
     protected void updateDetectedActivitiesList() {
         activityType.setText("Detected Activity : ");
-
+        Resources res = getResources(); /** from an Activity */
         switch (PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getString("detActivity", "NA")) {
             case "1":
                 activityType.append(getString(R.string.bicycle));
+                image.setImageDrawable(null);
                 break;
             case "0":
                 activityType.append(getString(R.string.vehicle));
+                image.setImageDrawable(null);
                 break;
             case "2":
                 activityType.append(getString(R.string.foot));
+                image.setImageDrawable(res.getDrawable(R.drawable.pedestrianwalking));
                 break;
             case "8":
                 activityType.append(getString(R.string.running));
+                image.setImageDrawable(res.getDrawable(R.drawable.runer));
                 break;
             case "3":
                 activityType.append(getString(R.string.still));
+                image.setImageDrawable(res.getDrawable(R.drawable.yogaposture));
                 break;
             case "5":
                 activityType.append(getString(R.string.tilting));
+                image.setImageDrawable(null);
                 break;
             case "7":
                 activityType.append(getString(R.string.walking));
+                image.setImageDrawable(res.getDrawable(R.drawable.manwalking));
                 break;
             default:
                 activityType.append(getString(R.string.unknown_activity));
+                image.setImageDrawable(res.getDrawable(R.drawable.yogaposture));
+                image.setImageDrawable(null);
         }
 
 

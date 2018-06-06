@@ -42,4 +42,14 @@
         android:layout_marginTop="@dimen/textview_margin"
         android:text="This screen will automatically update when it detects a change in your activity." />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <ImageView
+        android:layout_centerHorizontal="true"
+        android:id="@+id/image"
+        android:layout_width="50dp"
+        android:layout_height="50dp" />
+    </RelativeLayout>
+
 </LinearLayout>
