@@ -1,32 +1,25 @@
 package com.example.rafi.caloriestracker;
 
-import android.content.res.Resources;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.app.PendingIntent;
-import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
-import android.view.View;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionClient;
-import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-
-import java.util.ArrayList;
 
 public class TrackerActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static final String DETECTED_ACTIVITY = ".DETECTED_ACTIVITY";
     ImageView image;
-
     TextView activityType;
     TextView confidencePercentage;
     private Context mContext;
@@ -39,12 +32,9 @@ public class TrackerActivity extends AppCompatActivity
         setContentView(R.layout.activity_track_activity);
 
         mContext = this;
-
         image = (ImageView) findViewById(R.id.image);
         activityType = (TextView) findViewById(R.id.activity_type);
         confidencePercentage = (TextView) findViewById(R.id.confidence_percentage);
-
-       // mActivityRecognitionClient = new ActivityRecognitionClient(this);
         mActivityRecognitionClient = ActivityRecognition.getClient(this);
         requestUpdatesHandler();
     }
@@ -65,7 +55,7 @@ public class TrackerActivity extends AppCompatActivity
     }
 
     public void requestUpdatesHandler() {
-//Set the activity detection interval. I’m using 3 seconds//
+    //Set the activity detection interval.  3 seconds
         Task<Void> task = mActivityRecognitionClient.requestActivityUpdates(
                 3000,
                 getActivityDetectionPendingIntent());
@@ -77,15 +67,15 @@ public class TrackerActivity extends AppCompatActivity
         });
     }
 
-    //Get a PendingIntent//
+
     private PendingIntent getActivityDetectionPendingIntent() {
-//Send the activity data to our DetectedActivitiesIntentService class//
+        //Send the activity data to our DetectedActivitiesIntentService class
         Intent intent = new Intent(this, ActivityIntentService.class);
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
     }
 
-    //Process the list of activities//
+
     protected void updateDetectedActivitiesList() {
         activityType.setText("Detected Activity : ");
         Resources res = getResources(); /** from an Activity */

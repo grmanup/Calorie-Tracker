@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -40,10 +41,11 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    static float expendedCalories = 0;
     GoogleApiClient mClient;
-    static float expendedCalories=0;
-    int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE =11;
-    String TAG = "TAG";
+    int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 11;
+    String TAG = MainActivity.class.getName();
 
     TextView countStill;
     TextView countWalking;
@@ -52,22 +54,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     TextView countRunningJogging;
 
     TextView countBiking;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        countStill = (TextView)  findViewById(R.id.count);
-
-        countWalking = (TextView)  findViewById(R.id.count_walking);
-
-        countStair = (TextView)  findViewById(R.id.count_stair);
-
-        countOnVehicle = (TextView)  findViewById(R.id.count_onVehicle);
-
-        countRunningJogging = (TextView)  findViewById(R.id.count_onRunningJogging);
-
-        countBiking = (TextView)  findViewById(R.id.count_onBiking);
+        countStill = (TextView) findViewById(R.id.count);
+        countWalking = (TextView) findViewById(R.id.count_walking);
+        countStair = (TextView) findViewById(R.id.count_stair);
+        countOnVehicle = (TextView) findViewById(R.id.count_onVehicle);
+        countRunningJogging = (TextView) findViewById(R.id.count_onRunningJogging);
+        countBiking = (TextView) findViewById(R.id.count_onBiking);
 
 
         FitnessOptions fitnessOptions = FitnessOptions.builder()
@@ -87,9 +85,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("TAG", "ON ACTIVITY RESULT");
+        Log.i("TAG", "onActivityResult");
         if (resultCode == Activity.RESULT_OK) {
             buildFitnessClient();
             if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
@@ -136,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.i("TAG", "CONNECTED");
+        Log.i(TAG, "onConnected");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         fetchUserGoogleFitData(sdf.format(new Date()));
 
@@ -150,11 +149,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void buildFitnessClient() {
         // Create the Google API Client
         Log.d("TAG", "buildFitnessClient");
-         mClient = new GoogleApiClient.Builder(this)
+        mClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.HISTORY_API)
-                 .addApi(Fitness.CONFIG_API)
+                .addApi(Fitness.CONFIG_API)
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
-                 .addOnConnectionFailedListener(this)
+                .addOnConnectionFailedListener(this)
                 .addConnectionCallbacks(this)
                 .useDefaultAccount().build();
         mClient.connect();
@@ -170,22 +169,47 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (mClient != null && mClient.isConnected()) {
             SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             Date d1 = null;
-            try{
+            try {
                 d1 = originalFormat.parse(date);
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
             Calendar calendar = Calendar.getInstance();
 
-            try{
+            try {
                 calendar.setTime(d1);
-            }catch (Exception e){
+            } catch (Exception e) {
                 calendar.setTime(new Date());
             }
             DataReadRequest readRequest = queryDateFitnessData(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
             new GetCaloriesAsyncTask(readRequest, mClient).execute();
 
         }
+    }
+
+    private DataReadRequest queryDateFitnessData(int year, int month, int day_of_Month) {
+
+        Calendar startCalendar = Calendar.getInstance(Locale.getDefault());
+        startCalendar.set(Calendar.YEAR, year);
+        startCalendar.set(Calendar.MONTH, month);
+        startCalendar.set(Calendar.DAY_OF_MONTH, day_of_Month);
+        startCalendar.set(Calendar.HOUR_OF_DAY, 23);
+        startCalendar.set(Calendar.MINUTE, 59);
+        startCalendar.set(Calendar.SECOND, 59);
+        startCalendar.set(Calendar.MILLISECOND, 999);
+        long endTime = startCalendar.getTimeInMillis();
+        startCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        startCalendar.set(Calendar.MINUTE, 0);
+        startCalendar.set(Calendar.SECOND, 0);
+        startCalendar.set(Calendar.MILLISECOND, 0);
+        long startTime = startCalendar.getTimeInMillis();
+
+        return new DataReadRequest.Builder()
+                .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
+                .bucketByActivitySegment(1, TimeUnit.MILLISECONDS)
+                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                .build();
+
     }
 
     public class GetCaloriesAsyncTask extends AsyncTask<Void, Void, DataReadResult> {
@@ -226,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
             countStill.setText(String.valueOf(expendedCalories));
-            expendedCalories=0;
+            expendedCalories = 0;
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.WALKING)) {
@@ -239,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             countWalking.setText(String.valueOf(expendedCalories));
 
-            expendedCalories=0;
+            expendedCalories = 0;
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.STAIR_CLIMBING)) {
@@ -252,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             countStair.setText(String.valueOf(expendedCalories));
 
-            expendedCalories=0;
+            expendedCalories = 0;
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.IN_VEHICLE)) {
@@ -265,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             countOnVehicle.setText(String.valueOf(expendedCalories));
 
-            expendedCalories=0;
+            expendedCalories = 0;
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.RUNNING_JOGGING)) {
@@ -278,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             countRunningJogging.setText(String.valueOf(expendedCalories));
 
-            expendedCalories=0;
+            expendedCalories = 0;
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.BIKING)) {
@@ -296,9 +320,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-
     private void dumpDataSet(DataSet dataSet) {
-        Log.e(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
+        Log.e(TAG, " Data type: " + dataSet.getDataType().getName());
 
         for (DataPoint dp : dataSet.getDataPoints()) {
             if (dp.getEndTime(TimeUnit.MILLISECONDS) > dp.getStartTime(TimeUnit.MILLISECONDS)) {
@@ -310,35 +333,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    private DataReadRequest queryDateFitnessData(int year, int month, int day_of_Month) {
-
-        Calendar startCalendar = Calendar.getInstance(Locale.getDefault());
-        startCalendar.set(Calendar.YEAR, year);
-        startCalendar.set(Calendar.MONTH, month);
-        startCalendar.set(Calendar.DAY_OF_MONTH, day_of_Month);
-        startCalendar.set(Calendar.HOUR_OF_DAY, 23);
-        startCalendar.set(Calendar.MINUTE, 59);
-        startCalendar.set(Calendar.SECOND, 59);
-        startCalendar.set(Calendar.MILLISECOND, 999);
-        long endTime = startCalendar.getTimeInMillis();
-        startCalendar.set(Calendar.HOUR_OF_DAY, 0);
-        startCalendar.set(Calendar.MINUTE, 0);
-        startCalendar.set(Calendar.SECOND, 0);
-        startCalendar.set(Calendar.MILLISECOND, 0);
-        long startTime = startCalendar.getTimeInMillis();
-
-        return new DataReadRequest.Builder()
-                .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
-                .bucketByActivitySegment(1, TimeUnit.MILLISECONDS)
-                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                .build();
-
-    }
-
-    public void launchActivity(View view)
-    {
+    public void launchActivity(View view) {
         Intent intent = new Intent(this, TrackerActivity.class);
         startActivity(intent);
     }
+
 
 }

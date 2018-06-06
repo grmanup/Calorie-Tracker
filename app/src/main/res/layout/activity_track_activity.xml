@@ -11,23 +11,24 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <TextView
-            android:textStyle="bold"
             android:id="@+id/activity_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/textview_margin"
-            android:text="@string/still" />
+            android:text="@string/still"
+            android:textStyle="bold" />
 
         <TextView
-            android:textStyle="bold"
-            android:text="NA"
             android:id="@+id/confidence_percentage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="@dimen/textview_margin" />
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/textview_margin"
+            android:text="NA"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <View
@@ -36,20 +37,21 @@
         android:background="@android:color/darker_gray" />
 
     <TextView
-        android:textStyle="italic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/textview_margin"
-        android:text="@string/desc" />
+        android:text="@string/desc"
+        android:textStyle="italic" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <ImageView
-        android:layout_centerHorizontal="true"
-        android:id="@+id/image"
-        android:layout_width="50dp"
-        android:layout_height="50dp" />
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
 </LinearLayout>

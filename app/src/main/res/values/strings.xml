@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Calories Tracker</string>
         <string name="track">Track Activity</string>
-        <string name="percentage">%1$d%%</string>
         <string name="bicycle">On a bicycle</string>
         <string name="foot">On foot</string>
         <string name="running">Running</string>
@@ -11,7 +10,4 @@
         <string name="vehicle">In a vehicle</string>
         <string name="walking">Walking</string>
         <string name="desc">This screen will automatically update when it detects a change in your activity.</string>
-
-
-
 </resources>
