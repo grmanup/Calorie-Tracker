@@ -40,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/textview_margin"
-        android:text="This screen will automatically update when it detects a change in your activity." />
+        android:text="@string/desc" />
 
     <RelativeLayout
         android:layout_width="match_parent"

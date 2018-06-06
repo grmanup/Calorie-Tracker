@@ -40,34 +40,40 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    GoogleApiClient mClient1;
+    GoogleApiClient mClient;
     static float expendedCalories=0;
     int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE =11;
     String TAG = "TAG";
-    TextView activityStill;
+
     TextView countStill;
-    TextView activityWalking;
     TextView countWalking;
+    TextView countStair;
+    TextView countOnVehicle;
+    TextView countRunningJogging;
+
+    TextView countBiking;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        activityStill = (TextView)  findViewById(R.id.activity_still);
         countStill = (TextView)  findViewById(R.id.count);
-        activityWalking = (TextView)  findViewById(R.id.activity_walking);
+
         countWalking = (TextView)  findViewById(R.id.count_walking);
+
+        countStair = (TextView)  findViewById(R.id.count_stair);
+
+        countOnVehicle = (TextView)  findViewById(R.id.count_onVehicle);
+
+        countRunningJogging = (TextView)  findViewById(R.id.count_onRunningJogging);
+
+        countBiking = (TextView)  findViewById(R.id.count_onBiking);
 
 
         FitnessOptions fitnessOptions = FitnessOptions.builder()
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .build();
-
-        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this);
-
-        Log.i("TAG", "onCreate"+String.valueOf(resultCode));
 
         if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)) {
             GoogleSignIn.requestPermissions(
@@ -131,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.i("TAG", "CONNECTED");
-        fetchUserGoogleFitData("2018-06-5");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        fetchUserGoogleFitData(sdf.format(new Date()));
 
     }
 
@@ -143,18 +150,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void buildFitnessClient() {
         // Create the Google API Client
         Log.d("TAG", "buildFitnessClient");
-         mClient1 = new GoogleApiClient.Builder(this)
+         mClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.HISTORY_API)
                  .addApi(Fitness.CONFIG_API)
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
                  .addOnConnectionFailedListener(this)
                 .addConnectionCallbacks(this)
                 .useDefaultAccount().build();
-        mClient1.connect();
+        mClient.connect();
 
     }
-
-
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -162,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void fetchUserGoogleFitData(String date) {
-        if (mClient1 != null && mClient1.isConnected()) {
+        if (mClient != null && mClient.isConnected()) {
             SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             Date d1 = null;
             try{
@@ -178,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 calendar.setTime(new Date());
             }
             DataReadRequest readRequest = queryDateFitnessData(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-            new GetCaloriesAsyncTask(readRequest, mClient1).execute();
+            new GetCaloriesAsyncTask(readRequest, mClient).execute();
 
         }
     }
@@ -207,15 +212,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     void printData(DataReadResult dataReadResult) {
-        // [START parse_read_data_result]
-        // If the DataReadRequest object specified aggregated data, dataReadResult will be returned
-        // as buckets containing DataSets, instead of just DataSets.
         if (dataReadResult.getBuckets().size() > 0) {
-            Log.e(TAG, "Number of returned buckets of DataSets is: "+ dataReadResult.getBuckets().size());
+
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.STILL)) {
-                    Log.e(TAG, "bucket type->" + bucket.getActivity());
+                    Log.e(TAG, "bucket type " + bucket.getActivity());
                     List<DataSet> dataSets = bucket.getDataSets();
                     for (DataSet dataSet : dataSets) {
                         dumpDataSet(dataSet);
@@ -228,23 +230,73 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             for (Bucket bucket : dataReadResult.getBuckets()) {
                 String bucketActivity = bucket.getActivity();
                 if (bucketActivity.contains(FitnessActivities.WALKING)) {
-                    Log.e(TAG, "bucket type->" + bucket.getActivity());
+                    Log.e(TAG, "bucket type " + bucket.getActivity());
                     List<DataSet> dataSets = bucket.getDataSets();
                     for (DataSet dataSet : dataSets) {
                         dumpDataSet(dataSet);
                     }
                 }
             }
-
             countWalking.setText(String.valueOf(expendedCalories));
 
+            expendedCalories=0;
+            for (Bucket bucket : dataReadResult.getBuckets()) {
+                String bucketActivity = bucket.getActivity();
+                if (bucketActivity.contains(FitnessActivities.STAIR_CLIMBING)) {
+                    Log.e(TAG, "bucket type " + bucket.getActivity());
+                    List<DataSet> dataSets = bucket.getDataSets();
+                    for (DataSet dataSet : dataSets) {
+                        dumpDataSet(dataSet);
+                    }
+                }
+            }
+            countStair.setText(String.valueOf(expendedCalories));
+
+            expendedCalories=0;
+            for (Bucket bucket : dataReadResult.getBuckets()) {
+                String bucketActivity = bucket.getActivity();
+                if (bucketActivity.contains(FitnessActivities.IN_VEHICLE)) {
+                    Log.e(TAG, "bucket type " + bucket.getActivity());
+                    List<DataSet> dataSets = bucket.getDataSets();
+                    for (DataSet dataSet : dataSets) {
+                        dumpDataSet(dataSet);
+                    }
+                }
+            }
+            countOnVehicle.setText(String.valueOf(expendedCalories));
+
+            expendedCalories=0;
+            for (Bucket bucket : dataReadResult.getBuckets()) {
+                String bucketActivity = bucket.getActivity();
+                if (bucketActivity.contains(FitnessActivities.RUNNING_JOGGING)) {
+                    Log.e(TAG, "bucket type " + bucket.getActivity());
+                    List<DataSet> dataSets = bucket.getDataSets();
+                    for (DataSet dataSet : dataSets) {
+                        dumpDataSet(dataSet);
+                    }
+                }
+            }
+            countRunningJogging.setText(String.valueOf(expendedCalories));
+
+            expendedCalories=0;
+            for (Bucket bucket : dataReadResult.getBuckets()) {
+                String bucketActivity = bucket.getActivity();
+                if (bucketActivity.contains(FitnessActivities.BIKING)) {
+                    Log.e(TAG, "bucket type " + bucket.getActivity());
+                    List<DataSet> dataSets = bucket.getDataSets();
+                    for (DataSet dataSet : dataSets) {
+                        dumpDataSet(dataSet);
+                    }
+                }
+            }
+            countBiking.setText(String.valueOf(expendedCalories));
 
         }
 
 
     }
 
-    // [START parse_dataset]
+
     private void dumpDataSet(DataSet dataSet) {
         Log.e(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
 
@@ -276,19 +328,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         long startTime = startCalendar.getTimeInMillis();
 
         return new DataReadRequest.Builder()
-                // The data request can specify multiple data types to return, effectively
-                // combining multiple data queries into one call.
-                // In this example, it's very unlikely that the request is for several hundred
-                // datapoints each consisting of a few steps and a timestamp.  The more likely
-                // scenario is wanting to see how many steps were walked per day, for 7 days.
-                //.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
-                //.aggregate(DataType.TYPE_CALORIES_EXPENDED,DataType.AGGREGATE_CALORIES_EXPENDED)
                 .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
-                // .read(DataType.TYPE_CALORIES_EXPENDED)
-                // Analogous to a "Group By" in SQL, defines how data should be aggregated.
-                // bucketByTime allows for a time span, whereas bucketBySession would allow
-                // bucketing by "sessions", which would need to be defined in code.
-                //.bucketByTime(1, TimeUnit.DAYS)
                 .bucketByActivitySegment(1, TimeUnit.MILLISECONDS)
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
                 .build();
