@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/layout_padding"
+    android:paddingLeft="@dimen/layout_padding"
+    android:paddingRight="@dimen/layout_padding"
+    android:paddingTop="@dimen/layout_padding">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textStyle="bold"
+            android:id="@+id/activity_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/textview_margin"
+            android:text="@string/still" />
+
+        <TextView
+            android:textStyle="bold"
+            android:text="NA"
+            android:id="@+id/confidence_percentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="@dimen/textview_margin" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:textStyle="italic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/textview_margin"
+        android:text="This screen will automatically update when it detects a change in your activity." />
+
+</LinearLayout>
